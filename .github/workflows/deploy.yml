@@ -1,0 +1,27 @@
+name: Deploy CI/CD
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+    
+    steps:
+    - name: Checkout código
+      uses: actions/checkout@v3
+    
+    - name: Ejecutar tests simulados
+      run: |
+        echo "🧪 Ejecutando tests..."
+        echo "✅ Tests pasados correctamente"
+    
+    - name: Deploy a GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: .

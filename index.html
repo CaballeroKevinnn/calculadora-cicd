@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora CI/CD</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container { max-width: 400px; width: 100%; }
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        .subtitle {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+        .calculator {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        .display {
+            background: #2d3748;
+            color: white;
+            font-size: 2.5em;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: right;
+            margin-bottom: 20px;
+            min-height: 80px;
+            word-wrap: break-word;
+        }
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        .btn {
+            padding: 20px;
+            font-size: 1.5em;
+            border: none;
+            border-radius: 10px;
+            background: #e2e8f0;
+            color: #2d3748;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .btn:active { transform: scale(0.95); }
+        .btn-clear { background: #f56565; color: white; grid-column: span 2; }
+        .btn-operator { background: #ed8936; color: white; }
+        .btn-equals { background: #48bb78; color: white; grid-row: span 2; }
+        .btn-zero { grid-column: span 2; }
+        .cicd-info {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        .cicd-info h3 { color: #2d3748; margin-bottom: 15px; }
+        .cicd-info ul { list-style: none; }
+        .cicd-info li { color: #4a5568; padding: 8px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧮 Calculadora CI/CD</h1>
+        <p class="subtitle">Proyecto de Automatización - Ingeniería de Software</p>
+        
+        <div class="calculator">
+            <div class="display" id="display">0</div>
+            
+            <div class="buttons">
+                <button class="btn btn-clear" onclick="clearCalc()">C</button>
+                <button class="btn btn-operator" onclick="addOperator('/')">/</button>
+                <button class="btn btn-operator" onclick="addOperator('*')">×</button>
+                <button class="btn btn-operator" onclick="deleteDigit()">←</button>
+                
+                <button class="btn" onclick="addNumber('7')">7</button>
+                <button class="btn" onclick="addNumber('8')">8</button>
+                <button class="btn" onclick="addNumber('9')">9</button>
+                <button class="btn btn-operator" onclick="addOperator('-')">-</button>
+                
+                <button class="btn" onclick="addNumber('4')">4</button>
+                <button class="btn" onclick="addNumber('5')">5</button>
+                <button class="btn" onclick="addNumber('6')">6</button>
+                <button class="btn btn-operator" onclick="addOperator('+')">+</button>
+                
+                <button class="btn" onclick="addNumber('1')">1</button>
+                <button class="btn" onclick="addNumber('2')">2</button>
+                <button class="btn" onclick="addNumber('3')">3</button>
+                <button class="btn btn-equals" onclick="calculate()">=</button>
+                
+                <button class="btn btn-zero" onclick="addNumber('0')">0</button>
+                <button class="btn" onclick="addDecimal()">.</button>
+            </div>
+        </div>
+
+        <div class="cicd-info">
+            <h3>✅ Pipeline CI/CD Implementado</h3>
+            <ul>
+                <li>✓ Integración Continua con GitHub Actions</li>
+                <li>✓ Testing automatizado en cada push</li>
+                <li>✓ Despliegue automático a GitHub Pages</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        let displayValue = '0';
+        let firstOperand = null;
+        let operator = null;
+        let waitingForSecond = false;
+
+        function updateDisplay() {
+            document.getElementById('display').textContent = displayValue;
+        }
+
+        function clearCalc() {
+            displayValue = '0';
+            firstOperand = null;
+            operator = null;
+            waitingForSecond = false;
+            updateDisplay();
+        }
+
+        function addNumber(num) {
+            if (waitingForSecond) {
+                displayValue = num;
+                waitingForSecond = false;
+            } else {
+                displayValue = displayValue === '0' ? num : displayValue + num;
+            }
+            updateDisplay();
+        }
+
+        function addDecimal() {
+            if (waitingForSecond) {
+                displayValue = '0.';
+                waitingForSecond = false;
+            } else if (!displayValue.includes('.')) {
+                displayValue += '.';
+            }
+            updateDisplay();
+        }
+
+        function addOperator(op) {
+            const inputValue = parseFloat(displayValue);
+            if (firstOperand === null) {
+                firstOperand = inputValue;
+            } else if (operator) {
+                const result = performCalc(firstOperand, inputValue, operator);
+                displayValue = String(result);
+                firstOperand = result;
+            }
+            waitingForSecond = true;
+            operator = op;
+            updateDisplay();
+        }
+
+        function calculate() {
+            const inputValue = parseFloat(displayValue);
+            if (operator && firstOperand !== null) {
+                const result = performCalc(firstOperand, inputValue, operator);
+                displayValue = String(result);
+                firstOperand = null;
+                operator = null;
+                waitingForSecond = false;
+                updateDisplay();
+            }
+        }
+
+        function performCalc(a, b, op) {
+            switch (op) {
+                case '+': return a + b;
+                case '-': return a - b;
+                case '*': return a * b;
+                case '/': return b === 0 ? 'Error' : a / b;
+                default: return b;
+            }
+        }
+
+        function deleteDigit() {
+            displayValue = displayValue.length > 1 ? displayValue.slice(0, -1) : '0';
+            updateDisplay();
+        }
+    </script>
+</body>
+</html>
